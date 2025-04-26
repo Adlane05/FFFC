@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "773072036609",
+    "project_id": "friendship-freedom-chart",
+    "storage_bucket": "friendship-freedom-chart.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773072036609:android:7d7b49f8719e48f9cdb100",
+        "android_client_info": {
+          "package_name": "com.example.pleaseee"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "773072036609-2ndgcqd31k9405l981irdoh69co611uq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example",
+            "certificate_hash": "4d7316270a1cc413a41bd34ce3ec09dd2c24be11"
+          }
+        },
+        {
+          "client_id": "773072036609-e6avuo4jqq9ha071abq4u0jn3la7q1u3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAsHJtOasLD94KQ3se7FlkcTEyTHWQpSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "773072036609-e6avuo4jqq9ha071abq4u0jn3la7q1u3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
