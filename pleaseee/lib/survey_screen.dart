@@ -1,8 +1,14 @@
+// survey_screen.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
-import 'home_screen.dart'; // Replace with your actual HomePage file
+final List<Map<String, dynamic>> surveyQuestions = [
+  {'field': 'busySlots', 'type': 'time-slots'},
+  {'field': 'customStatus', 'type': 'text', 'title': 'What status would you like your friends to see?'},
+];
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({Key? key}) : super(key: key);
@@ -12,129 +18,45 @@ class SurveyScreen extends StatefulWidget {
 }
 
 class _SurveyScreenState extends State<SurveyScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final Map<String, dynamic> _answers = {};
+  final PageController _pageController = PageController();
+  final Map<String, dynamic> _answers = {
+    'busySlots': <String, List<String>>{},
+    'customStatus': '',
+  };
 
-  // You can easily expand or modify this list later
-  final List<Map<String, dynamic>> surveyQuestions = [
-    {
-      'field': 'freeTimeSlots',
-      'title': 'When are you usually free?',
-      'type': 'multi-select',
-      'options': [
-        'Mon AM', 'Mon PM', 'Tue AM', 'Tue PM',
-        'Wed AM', 'Wed PM', 'Thu AM', 'Thu PM',
-        'Fri AM', 'Fri PM', 'Weekend'
-      ],
-    },
-    {
-      'field': 'customStatus',
-      'title': 'What status would you like your friends to see?',
-      'type': 'text',
-    },
-    {
-      'field': 'usageType',
-      'title': 'How do you plan to use this app?',
-      'type': 'dropdown',
-      'options': [
-        'stalking my friends',
-        'Group planning',
-        'time management',
-        'love and happiness',
-      ],
-    },
-  ];
+  int _currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    for (var question in surveyQuestions) {
-      _answers[question['field']] =
-      question['type'] == 'multi-select' ? <String>[] : '';
+  void _nextPage() {
+    if (_currentIndex < surveyQuestions.length - 1) {
+      setState(() => _currentIndex++);
+      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    } else {
+      _submitSurvey();
+    }
+  }
+
+  void _prevPage() {
+    if (_currentIndex > 0) {
+      setState(() => _currentIndex--);
+      _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     }
   }
 
   Future<void> _submitSurvey() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser!;
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'busySlots': _answers['busySlots'],
+        'customStatus': _answers['customStatus'],
+        'usageType': _answers['usageType'],
+      }, SetOptions(merge: true));
 
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'fullName': user.displayName ?? '',
-          'email': user.email ?? '',
-          ..._answers,
-        }, SetOptions(merge: true));
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      } catch (e) {
-        print("Error saving survey: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error saving survey")),
-        );
-      }
-    }
-  }
-
-  Widget _buildQuestion(Map<String, dynamic> question) {
-    final field = question['field'];
-    final title = question['title'];
-    final type = question['type'];
-
-    switch (type) {
-      case 'text':
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: TextFormField(
-            decoration: InputDecoration(labelText: title),
-            onChanged: (val) => _answers[field] = val,
-          ),
-        );
-
-      case 'dropdown':
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: DropdownButtonFormField<String>(
-            decoration: InputDecoration(labelText: title),
-            items: (question['options'] as List<String>)
-                .map((String opt) => DropdownMenuItem<String>(
-              value: opt,
-              child: Text(opt),
-            ))
-                .toList(),
-            onChanged: (val) => _answers[field] = val,
-          ),
-        );
-
-      case 'multi-select':
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ...question['options'].map<Widget>((opt) {
-              final selected = (_answers[field] as List<String>).contains(opt);
-              return CheckboxListTile(
-                title: Text(opt),
-                value: selected,
-                onChanged: (val) {
-                  setState(() {
-                    if (val == true) {
-                      (_answers[field] as List<String>).add(opt);
-                    } else {
-                      (_answers[field] as List<String>).remove(opt);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ],
-        );
-
-      default:
-        return const SizedBox.shrink();
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    } catch (e) {
+      print('Error saving survey: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error saving survey')),
+      );
     }
   }
 
@@ -142,23 +64,147 @@ class _SurveyScreenState extends State<SurveyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quick Survey'),
+        title: const Text('Complete Your Setup'),
         backgroundColor: Colors.teal,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          BusySlotPicker(onSave: (busySlots) => _answers['busySlots'] = busySlots),
+          CustomStatusPage(onChanged: (value) => _answers['customStatus'] = value),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ...surveyQuestions.map(_buildQuestion).toList(),
-            const SizedBox(height: 20),
+            if (_currentIndex > 0)
+              ElevatedButton(
+                onPressed: _prevPage,
+                child: const Text('Back'),
+              ),
             ElevatedButton(
-              onPressed: _submitSurvey,
-              child: const Text('Submit'),
-            )
+              onPressed: _nextPage,
+              child: Text(_currentIndex == surveyQuestions.length - 1 ? 'Finish' : 'Next'),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+
+class BusySlotPicker extends StatefulWidget {
+  final Function(Map<String, List<String>>) onSave;
+
+  const BusySlotPicker({required this.onSave, Key? key}) : super(key: key);
+
+  @override
+  State<BusySlotPicker> createState() => _BusySlotPickerState();
+}
+
+class _BusySlotPickerState extends State<BusySlotPicker> {
+  final List<String> weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  String _selectedDay = 'Monday';
+  final Map<String, List<String>> _selectedSlots = {};
+
+  List<String> _generateDaytimeSlots() {
+    final slots = <String>[];
+    for (int hour = 8; hour < 18; hour++) {
+      slots.add('${hour.toString().padLeft(2, '0')}:00');
+      slots.add('${hour.toString().padLeft(2, '0')}:30');
+    }
+    return slots;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final timeSlots = _generateDaytimeSlots();
+    final selected = _selectedSlots[_selectedDay] ?? [];
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Text('Select your busy time slots', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            value: _selectedDay,
+            items: weekdays.map((day) => DropdownMenuItem(value: day, child: Text(day))).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedDay = value);
+              }
+            },
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'Day'),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: 3,
+                crossAxisSpacing: 0,
+                mainAxisSpacing: 0,
+              ),
+              itemCount: timeSlots.length,
+              itemBuilder: (context, index) {
+                final slot = timeSlots[index];
+                final isSelected = selected.contains(slot);
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedSlots[_selectedDay] ??= [];
+                      if (isSelected) {
+                        _selectedSlots[_selectedDay]!.remove(slot);
+                      } else {
+                        _selectedSlots[_selectedDay]!.add(slot);
+                      }
+                      widget.onSave(_selectedSlots);
+                    });
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.teal : Colors.white,
+                      border: Border.all(color: isSelected ? Colors.teal : Colors.grey),
+                    ),
+                    child: Text(slot, style: TextStyle(color: isSelected ? Colors.white : Colors.black)),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomStatusPage extends StatelessWidget {
+  final Function(String) onChanged;
+
+  const CustomStatusPage({required this.onChanged, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Text('Create a custom status for when you\'re free:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          TextFormField(
+            decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
