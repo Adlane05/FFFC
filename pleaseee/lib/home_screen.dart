@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pleaseee/friend_profile_screen.dart';
+import 'package:pleaseee/friends_screen.dart';
+import 'package:pleaseee/main.dart';
+import 'package:pleaseee/profile_screen.dart';
 import 'package:pleaseee/survey_screen.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
@@ -164,7 +167,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(drawer: Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Color(0xFF10AF9C)),
+            child: Text(
+              'Menu',
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+            onTap: () async {
+               await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+               setState(() {
+                 _calendarDataFuture = _fetchCalendarData(); // Refresh on return
+               });
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.group),
+            title: Text('Friends'),
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => FriendsScreen()),
+              );
+              setState(() {
+                _calendarDataFuture = _fetchCalendarData(); // Refresh on return
+              });
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Logout'),
+            onTap: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => LandingPage()),
+                    (Route<dynamic> route) => false,
+              );
+            },
+          ),
+        ],
+      ),
+    ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF10AF9C),
         title: const Text(
