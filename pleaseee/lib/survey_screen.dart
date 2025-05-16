@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({Key? key}) : super(key: key);
@@ -16,6 +18,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
   final Map<String, dynamic> _answers = {
     'busySlots': <String, List<String>>{},
     'customStatus': '',
+    'name': '',
+    'photoUrl': '',
   };
 
   int _currentIndex = 0;
@@ -46,6 +50,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'busySlots': _answers['busySlots'],
         'customStatus': _answers['customStatus'],
+        'name': _answers['name'],
+        'photoUrl': _answers['photoUrl'],
       }, SetOptions(merge: true));
 
       // Now route home
@@ -78,7 +84,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           BusySlotPicker(onSave: (slots) => _answers['busySlots'] = slots),
-          CustomStatusPage(onChanged: (v) => _answers['customStatus'] = v),
+          CustomStatusPage(
+            onStatusChanged: (v) => _answers['customStatus'] = v,
+            onNameChanged: (v) => _answers['name'] = v,
+            onPhotoUrlChanged: (v) => _answers['photoUrl'] = v,
+          ),
           AddFriendPage(), // NEW!
         ],
       ),
@@ -318,24 +328,96 @@ class _BusySlotPickerState extends State<BusySlotPicker> {
   }
 }
 
-class CustomStatusPage extends StatelessWidget {
-  final Function(String) onChanged;
+class CustomStatusPage extends StatefulWidget {
+  final Function(String) onStatusChanged;
+  final Function(String) onNameChanged;
+  final Function(String) onPhotoUrlChanged;
 
-  const CustomStatusPage({required this.onChanged, Key? key}) : super(key: key);
+  const CustomStatusPage({
+    required this.onStatusChanged,
+    required this.onNameChanged,
+    required this.onPhotoUrlChanged,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<CustomStatusPage> createState() => _CustomStatusPageState();
+}
+
+class _CustomStatusPageState extends State<CustomStatusPage> {
+  final TextEditingController _statusCtrl = TextEditingController();
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _imageUrlCtrl = TextEditingController();
+  File? _pickedImage;
+
+  Future<void> _pickImageFromGallery() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _pickedImage = File(pickedFile.path);
+        widget.onPhotoUrlChanged(pickedFile.path); // Local path (optional)
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const Text('Create a custom status for when you\'re free:',
+          const Text('Set your name and profile picture',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          TextFormField(
+
+          const SizedBox(height: 12),
+          TextField(
+            controller: _nameCtrl,
+            decoration: const InputDecoration(labelText: 'Your Name', border: OutlineInputBorder()),
+            onChanged: widget.onNameChanged,
+          ),
+
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: _pickImageFromGallery,
+                icon: const Icon(Icons.image),
+                label: const Text('Pick from gallery'),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _imageUrlCtrl,
+                  decoration: const InputDecoration(
+                      labelText: 'Or paste image URL',
+                      border: OutlineInputBorder()),
+                  onChanged: widget.onPhotoUrlChanged,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          if (_pickedImage != null)
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: FileImage(_pickedImage!),
+            )
+          else if (_imageUrlCtrl.text.isNotEmpty)
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: NetworkImage(_imageUrlCtrl.text),
+            ),
+
+          const SizedBox(height: 24),
+          const Text('Set your custom status',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _statusCtrl,
             decoration: const InputDecoration(
                 labelText: 'Status', border: OutlineInputBorder()),
-            onChanged: onChanged,
+            onChanged: widget.onStatusChanged,
           ),
         ],
       ),
