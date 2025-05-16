@@ -1,104 +1,143 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-class ColorPickerDialog extends StatelessWidget {
-  final Color initialColor;
-  ColorPickerDialog({required this.initialColor});
-
-  final colors = Colors.primaries;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Select Color'),
-      content: Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: colors.map((c) {
-          return GestureDetector(
-            onTap: () => Navigator.of(context).pop(c),
-            child: Container(
-              width: 30,
-              height: 30,
-              color: c,
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
 
 class FriendProfilePage extends StatefulWidget {
   final String friendUid;
-  const FriendProfilePage({required this.friendUid});
+  final void Function(Color newColor) onColorChanged;
+
+  const FriendProfilePage({
+    Key? key,
+    required this.friendUid,
+    required this.onColorChanged,
+  }) : super(key: key);
 
   @override
   State<FriendProfilePage> createState() => _FriendProfilePageState();
 }
 
 class _FriendProfilePageState extends State<FriendProfilePage> {
-  late DocumentSnapshot<Map<String, dynamic>> friendSnap;
-  Color? selectedColor;
+  Map<String, dynamic>? friendData;
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadFriend();
+    _loadFriendData();
   }
 
-  void _loadFriend() async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(widget.friendUid).get();
-    setState(() {
-      friendSnap = doc;
-      selectedColor = Colors.blue; // Default or pull from settings
-    });
+  Future<void> _loadFriendData() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.friendUid)
+        .get();
+
+    if (doc.exists) {
+      setState(() {
+        friendData = doc.data();
+        loading = false;
+      });
+    } else {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  Future<void> _changeCalendarColor() async {
+    final selectedColor = await showDialog<Color>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Pick a calendar color'),
+        content: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: Colors.primaries.map((color) {
+            return GestureDetector(
+              onTap: () => Navigator.of(context).pop(color),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black12),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+
+    if (selectedColor != null) {
+      final hexColor = '#${selectedColor.value.toRadixString(16).padLeft(8, '0')}';
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.friendUid)
+          .update({'calendarColor': hexColor});
+
+      widget.onColorChanged(selectedColor);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Calendar color updated')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (friendSnap == null) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (loading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Friend Profile')),
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    final data = friendSnap.data()!;
+    if (friendData == null) {
+      return  Scaffold(
+        appBar: AppBar(title: Text('Friend Profile')),
+        body: Center(child: Text('Friend not found.')),
+      );
+    }
+
+    final name = friendData!['name'] ?? 'Friend';
+    final email = friendData!['email'] ?? '';
+    final photoUrl = friendData!['photoUrl'];
+    final status = friendData!['status'] ?? '';
+
     return Scaffold(
-      appBar: AppBar(title: Text(data['name'] ?? 'Friend'), backgroundColor: Colors.teal),
+      appBar: AppBar(title: Text(name)),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage(data['photoUrl'] ?? ''),
-              radius: 40,
+            if (photoUrl != null)
+              CircleAvatar(
+                radius: 40,
+                backgroundImage: NetworkImage(photoUrl),
+              )
+            else
+              const CircleAvatar(
+                radius: 40,
+                child: Icon(Icons.person, size: 40),
+              ),
+            const SizedBox(height: 16),
+            Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+            if (email.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(email, style: const TextStyle(color: Colors.grey)),
+            ],
+            if (status.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('Status: $status', style: const TextStyle(fontStyle: FontStyle.italic)),
+            ],
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _changeCalendarColor,
+              icon: const Icon(Icons.color_lens),
+              label: const Text('Change Calendar Color'),
             ),
-            SizedBox(height: 12),
-            Text(data['email'] ?? '', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 12),
-            Text('Status: ${data['status'] ?? 'No status'}'),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Text('Calendar Color:'),
-                SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () async {
-                    final color = await showDialog<Color>(
-                      context: context,
-                      builder: (_) => ColorPickerDialog(initialColor: selectedColor!),
-                    );
-                    if (color != null) {
-                      setState(() => selectedColor = color);
-                      // Save locally or persist in Firestore if needed
-                    }
-                  },
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    color: selectedColor,
-                  ),
-                ),
-              ],
-            )
           ],
         ),
       ),
