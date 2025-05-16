@@ -62,8 +62,17 @@ class _SurveyScreenState extends State<SurveyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Complete Your Setup'),
-          backgroundColor: Colors.teal),
+        backgroundColor: const Color(0xFF10AF9C),
+        title: const Text(
+          'Complete your setup',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontFamily: 'Jersey 25',
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),

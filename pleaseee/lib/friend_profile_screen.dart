@@ -89,14 +89,36 @@ class _FriendProfilePageState extends State<FriendProfilePage> {
   Widget build(BuildContext context) {
     if (loading) {
       return Scaffold(
-        appBar: AppBar(title: Text('Friend Profile')),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF10AF9C),
+          title: const Text(
+            'Friend Profile',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontFamily: 'Jersey 25',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (friendData == null) {
       return  Scaffold(
-        appBar: AppBar(title: Text('Friend Profile')),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF10AF9C),
+          title: const Text(
+            'Friend Profile',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontFamily: 'Jersey 25',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
         body: Center(child: Text('Friend not found.')),
       );
     }
@@ -104,43 +126,54 @@ class _FriendProfilePageState extends State<FriendProfilePage> {
     final name = friendData!['name'] ?? 'Friend';
     final email = friendData!['email'] ?? '';
     final photoUrl = friendData!['photoUrl'];
-    final status = friendData!['status'] ?? '';
+    final status = friendData!['customStatus'] ?? '';
 
     return Scaffold(
-      appBar: AppBar(title: Text(name)),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            if (photoUrl != null)
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(photoUrl),
-              )
-            else
-              const CircleAvatar(
-                radius: 40,
-                child: Icon(Icons.person, size: 40),
-              ),
-            const SizedBox(height: 16),
-            Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-            if (email.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(email, style: const TextStyle(color: Colors.grey)),
-            ],
-            if (status.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text('Status: $status', style: const TextStyle(fontStyle: FontStyle.italic)),
-            ],
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _changeCalendarColor,
-              icon: const Icon(Icons.color_lens),
-              label: const Text('Change Calendar Color'),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF10AF9C),
+          title:  Text(
+            name,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontFamily: 'Jersey 25',
+              fontWeight: FontWeight.w400,
             ),
-          ],
+          ),
         ),
-      ),
+        body: Center(child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (photoUrl != null)
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(photoUrl),
+                )
+              else
+                const CircleAvatar(
+                  radius: 40,
+                  child: Icon(Icons.person, size: 40),
+                ),
+              const SizedBox(height: 16),
+              Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              if (email.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(email, style: const TextStyle(color: Colors.grey)),
+              ],
+              if (status.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text('Status: $status', style: const TextStyle(fontStyle: FontStyle.italic)),
+              ],
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _changeCalendarColor,
+                icon: const Icon(Icons.color_lens),
+                label: const Text('Change Calendar Color'),
+              ),
+            ],
+          ),
+        ),)
     );
   }
 }

@@ -166,8 +166,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shared Calendar'),
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color(0xFF10AF9C),
+        title: const Text(
+          'Calendar',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontFamily: 'Jersey 25',
+            fontWeight: FontWeight.w400,
+          ),
+        ),
       ),
       body: FutureBuilder<_CalendarData>(
         future: _calendarDataFuture,
