@@ -1,10 +1,8 @@
-// survey_screen.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({Key? key}) : super(key: key);
@@ -30,7 +28,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
       _pageController.nextPage(
           duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
-      // Last page: Finish survey
       _submitSurvey();
     }
   }
@@ -46,14 +43,12 @@ class _SurveyScreenState extends State<SurveyScreen> {
   Future<void> _submitSurvey() async {
     final user = FirebaseAuth.instance.currentUser!;
     try {
-      // Save survey answers
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'busySlots': _answers['busySlots'],
         'customStatus': _answers['customStatus'],
         'name': _answers['name'],
       }, SetOptions(merge: true));
 
-      // Now route home
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
@@ -87,7 +82,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
             onStatusChanged: (v) => _answers['customStatus'] = v,
             onNameChanged: (v) => _answers['name'] = v,
           ),
-          AddFriendPage(), // NEW!
+          AddFriendPage(),
         ],
       ),
       bottomNavigationBar: Padding(
@@ -131,7 +126,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
     });
 
     try {
-      // Look up the user by email
       final query = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: email)
@@ -152,15 +146,12 @@ class _AddFriendPageState extends State<AddFriendPage> {
           final userRef = FirebaseFirestore.instance.collection('users').doc(currentUid);
           final friendRef = FirebaseFirestore.instance.collection('users').doc(friendUid);
 
-          // Run updates in a batch
           final batch = FirebaseFirestore.instance.batch();
 
-          // Add friend to current user's list
           batch.update(userRef, {
             'friends': FieldValue.arrayUnion([friendUid])
           });
 
-          // Add current user to friend's list
           batch.update(friendRef, {
             'friends': FieldValue.arrayUnion([currentUid])
           });

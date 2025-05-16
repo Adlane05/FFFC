@@ -24,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser!;
   late Future<_CalendarData> _calendarDataFuture;
 
-  // Store user data locally so we can update colors without refetching everything
   List<_UserData> allUsers = [];
 
   @override
@@ -51,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
         friendIds.map((fid) => usersCol.doc(fid).get()),
       );
 
-      // Helper for busySlots
       Map<String, List<String>> extractBusy(Map<String, dynamic> data) {
         final raw = data['busySlots'];
         if (raw is Map<String, dynamic>) {
@@ -65,14 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
       allUsers = [];
 
-      // Parse color hex string to Color
       Color colorFromHex(String hex) {
         hex = hex.replaceFirst('#', '');
-        if (hex.length == 6) hex = 'ff' + hex; // add opacity if missing
+        if (hex.length == 6) hex = 'ff' + hex;
         return Color(int.parse(hex, radix: 16));
       }
 
-      // Add current user
       allUsers.add(_UserData(
         uid: meSnap.id,
         name: meData['name'] ?? 'You',
@@ -82,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
             : Colors.green,
       ));
 
-      // Add friends
       for (var snap in friendSnaps) {
         if (!snap.exists) {
           debugPrint("⚪ [Home] friend ${snap.id} doc missing");
@@ -130,8 +125,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 startTime: start,
                 endTime: start.add(Duration(minutes: 30)),
                 color: u.color.withOpacity(0.6),
-                subject: '',       // Empty string so no text shows on calendar
-                notes: u.uid,      // Store UID here for tap detection
+                subject: '',
+                notes: u.uid,
               ));
             }
           }
@@ -152,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
           color: newColor,
         );
 
-        // Rebuild appointments and legend with updated color
         final today = DateTime.now();
         final monday = today.subtract(Duration(days: today.weekday - 1));
         final appointments = _buildAppointments(allUsers, monday);
@@ -187,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
                setState(() {
-                 _calendarDataFuture = _fetchCalendarData(); // Refresh on return
+                 _calendarDataFuture = _fetchCalendarData();
                });
             },
           ),
@@ -200,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (_) => FriendsScreen()),
               );
               setState(() {
-                _calendarDataFuture = _fetchCalendarData(); // Refresh on return
+                _calendarDataFuture = _fetchCalendarData();
               });
             },
           ),
@@ -269,7 +263,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Column(
             children: [
-              // Legend
               Container(
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -288,7 +281,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Calendar
               Expanded(
                 child: SfCalendar(
                   view: CalendarView.workWeek,
@@ -323,7 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Free Now
               FutureBuilder<List<String>>(
                 future: _computeFreeNow(),
                 builder: (ctx, snap2) {

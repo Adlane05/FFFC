@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId: kIsWeb
-        ? '773072036609-e6avuo4jqq9ha071abq4u0jn3la7q1u3.apps.googleusercontent.com' // Replace this with your actual Web Client ID
+        ? '773072036609-e6avuo4jqq9ha071abq4u0jn3la7q1u3.apps.googleusercontent.com'
         : null,
   );
 

@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:sign_button/sign_button.dart';
 import 'home_screen.dart';
 import 'survey_screen.dart';
-import 'auth_service.dart'; // Import your AuthService
+import 'auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +64,6 @@ class _LandingPageState extends State<LandingPage> {
         final docSnapshot = await userRef.get();
 
         if (docSnapshot.exists) {
-          // User already exists in the database → route to HomePage
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => HomeScreen()),
