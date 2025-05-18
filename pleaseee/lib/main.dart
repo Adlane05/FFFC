@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'FFFC',
       theme: ThemeData(
         primarySwatch: Colors.teal,
+        canvasColor: Colors.white,
         scaffoldBackgroundColor: Colors.white,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -100,157 +101,169 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF10AF9C),
-        title: const Text(
-          'FFFC',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontFamily: 'Jersey 25',
-            fontWeight: FontWeight.w400,
+    return
+      Container(
+      decoration: BoxDecoration(
+        color: Colors.white
+      ),
+        child: Stack(
+        children: [
+          Positioned.fill(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Transform.scale(
+                  scaleX: 1,
+                  scaleY: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 80),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(image: AssetImage("assets/newgraphic.png"), fit: BoxFit.fitWidth),
+                    ),
+                  )
+                ),
+              )
+        ),
+      Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF10AF9C),
+          title: const Text(
+            'FFFC',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontFamily: 'Jersey 25',
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: MediaQuery.sizeOf(context).width,
-          height: MediaQuery.sizeOf(context).height,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: -4,
-                top: 135,
-                child: Container(
-                  width: 416,
-                  height: 782,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/img.png"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              const Positioned(
-                left: 40,
-                top: 30,
-                child: SizedBox(
-                  width: 346,
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'THE ',
-                          style: TextStyle(
-                            color: Color(0xFF10AF9C),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+        body: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height,
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+            ),
+            child: Stack(
+              children: [
+                const Positioned(
+                  left: 60,
+                  top: 30,
+                  child: SizedBox(
+                    width: 346,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'THE ',
+                            style: TextStyle(
+                              color: Color(0xFF10AF9C),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'F',
-                          style: TextStyle(
-                            color: Color(0xFFFFD017),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: 'F',
+                            style: TextStyle(
+                              color: Color(0xFFFFD017),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'RIENDSHIP\n',
-                          style: TextStyle(
-                            color: Color(0xFF10AF9C),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: 'RIENDSHIP\n',
+                            style: TextStyle(
+                              color: Color(0xFF10AF9C),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: '          F',
-                          style: TextStyle(
-                            color: Color(0xFFFFD017),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: '          F',
+                            style: TextStyle(
+                              color: Color(0xFFFFD017),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'REEDOM\n',
-                          style: TextStyle(
-                            color: Color(0xFF10AF9C),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: 'REEDOM\n',
+                            style: TextStyle(
+                              color: Color(0xFF10AF9C),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: '              F',
-                          style: TextStyle(
-                            color: Color(0xFFFFD017),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: '              F',
+                            style: TextStyle(
+                              color: Color(0xFFFFD017),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'INDER\n',
-                          style: TextStyle(
-                            color: Color(0xFF10AF9C),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: 'INDER\n',
+                            style: TextStyle(
+                              color: Color(0xFF10AF9C),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: '               C',
-                          style: TextStyle(
-                            color: Color(0xFFFFD017),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: '               C',
+                            style: TextStyle(
+                              color: Color(0xFFFFD017),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'HART',
-                          style: TextStyle(
-                            color: Color(0xFF10AF9C),
-                            fontSize: 50,
-                            fontFamily: 'Jersey 25',
-                            fontWeight: FontWeight.w400,
+                          TextSpan(
+                            text: 'HART',
+                            style: TextStyle(
+                              color: Color(0xFF10AF9C),
+                              fontSize: 50,
+                              fontFamily: 'Jersey 25',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: MediaQuery.sizeOf(context).height/2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      child: _loading
-                          ? CircularProgressIndicator()
-                          : SignInButton(
-                        buttonType: ButtonType.google,
-                        onPressed: _handleSignIn,
+                        ],
                       ),
                     ),
-                  ],
-                )
-              ),
-            ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 500),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: _loading
+                            ? CircularProgressIndicator()
+                            : SignInButton(
+                          buttonType: ButtonType.google,
+                          onPressed: _handleSignIn,
+                        ),
+                      ),
+                    ],
+                  )
+                ),
+              ],
+            ),
           ),
         ),
       ),
+      ]
+        )
     );
   }
 }
