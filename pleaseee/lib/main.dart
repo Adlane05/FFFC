@@ -115,8 +115,8 @@ class _LandingPageState extends State<LandingPage> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          width: double.infinity,
-          height: 917,
+          width: MediaQuery.sizeOf(context).width,
+          height: MediaQuery.sizeOf(context).height,
           decoration: const BoxDecoration(
             color: Colors.white,
           ),
@@ -230,17 +230,22 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 300,
-                left: 90,
-                child: Center(
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : SignInButton(
-                    buttonType: ButtonType.google,
-                    onPressed: _handleSignIn,
-                  ),
-                ),
+              Container(
+                margin: EdgeInsets.only(top: MediaQuery.sizeOf(context).height/2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: _loading
+                          ? CircularProgressIndicator()
+                          : SignInButton(
+                        buttonType: ButtonType.google,
+                        onPressed: _handleSignIn,
+                      ),
+                    ),
+                  ],
+                )
               ),
             ],
           ),
