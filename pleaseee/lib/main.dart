@@ -5,6 +5,7 @@ import 'package:sign_button/sign_button.dart';
 import 'home_screen.dart';
 import 'survey_screen.dart';
 import 'auth_service.dart';
+import 'splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: LandingPage(),
+      home: SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
