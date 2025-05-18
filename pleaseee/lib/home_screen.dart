@@ -26,10 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<_UserData> allUsers = [];
 
+  CalendarController monthController = CalendarController();
+  DateTime currentDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
     _calendarDataFuture = _fetchCalendarData();
+    monthController.view = CalendarView.workWeek;
+    monthController.displayDate = currentDate;
   }
 
   Future<_CalendarData> _fetchCalendarData() async {
@@ -159,6 +164,34 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void goToNextMonth() {
+    DateTime firstWorkdayOfNextMonth = DateTime(currentDate.year, currentDate.month + 1, 1);
+
+    while (firstWorkdayOfNextMonth.weekday == DateTime.saturday ||
+        firstWorkdayOfNextMonth.weekday == DateTime.sunday) {
+      firstWorkdayOfNextMonth = firstWorkdayOfNextMonth.add(Duration(days: 1));
+    }
+
+    setState(() {
+      currentDate = firstWorkdayOfNextMonth;
+      monthController.displayDate = currentDate;
+    });
+  }
+
+  void goToPreviousMonth() {
+    DateTime firstWorkdayOfLastMonth = DateTime(currentDate.year, currentDate.month - 1, 1);
+
+    while (firstWorkdayOfLastMonth.weekday == DateTime.saturday ||
+        firstWorkdayOfLastMonth.weekday == DateTime.sunday) {
+      firstWorkdayOfLastMonth = firstWorkdayOfLastMonth.add(Duration(days: 1));
+    }
+
+    setState(() {
+      currentDate = firstWorkdayOfLastMonth;
+      monthController.displayDate = currentDate;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(drawer: Drawer(
@@ -280,11 +313,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ),
-
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: goToPreviousMonth,
+                    ),
+                    Text(
+                      "${currentDate.year} - ${currentDate.month.toString().padLeft(2, '0')}",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.arrow_forward),
+                      onPressed: goToNextMonth,
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: SfCalendar(
                   view: CalendarView.workWeek,
                   firstDayOfWeek: 1,
+                  headerHeight: 0,
+                  controller: monthController,
+                  // headerStyle: CalendarHeaderStyle(
+                  //     textStyle: TextStyle(color: Colors.black),
+                  //     textAlign: TextAlign.center
+                  // ),
+                  // showNavigationArrow: true,
                   timeSlotViewSettings: const TimeSlotViewSettings(
                     startHour: 8,
                     endHour: 18,
