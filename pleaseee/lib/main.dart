@@ -231,7 +231,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
               Positioned(
-                bottom: 50,
+                bottom: 300,
                 left: 90,
                 child: Center(
                   child: _loading
