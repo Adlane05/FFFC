@@ -39,7 +39,7 @@ class _UpdateScheduleScreenState extends State<UpdateScheduleScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF10AF9C),
         title: const Text(
-          'Update your setup',
+          'Update your schedule',
           style: TextStyle(
             color: Colors.white,
             fontSize: 30,
