@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<_CalendarData> _calendarDataFuture;
 
   List<_UserData> allUsers = [];
+  List<String> friendRequests = [];
 
   CalendarController monthController = CalendarController();
   DateTime currentDate = DateTime.now();
@@ -192,8 +193,32 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<List<String>> getFriendRequests() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+
+        if (data != null && data.containsKey('FriendRequests')) {
+          List<dynamic> rawFriendRequests = data["FriendRequests"];
+          List<String> friendRequests = rawFriendRequests.cast<String>();
+          return friendRequests;
+        }
+      }
+      return [];
+    } catch (e) {
+      return ["1", "2", "3"];
+    }
+  }
+
+  void initFriendRequests() async {
+    friendRequests = await getFriendRequests();
+  }
+  
   @override
   Widget build(BuildContext context) {
+    initFriendRequests();
     return Scaffold(drawer: Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -318,10 +343,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     IconButton(
                         onPressed: () {
-
+                          // TODO IMPLEMENT DROPDOWN OR SOME KIND OF MENU FOR FRIEND REQUESTS
                         },
                         icon: Icon(Icons.notifications)
-                    )
+                    ),
+                    Text("${friendRequests.length}")
                   ]
                 )
               ),
