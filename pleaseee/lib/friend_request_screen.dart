@@ -92,9 +92,22 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
                 itemBuilder: (context, index) {
                   final friend = users[index];
                   return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(friend['photoUrl']),
+                    ),
                     title: Text(friend['name'] ?? 'Unnamed'),
                     subtitle: Text(friend['email'] ?? ''),
-                    trailing: IconButton(onPressed: () {}, icon: Icon(Icons.add))
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                            onPressed: () {}, icon: Icon(Icons.add_circle, color: Colors.green,),
+                        ),
+                        IconButton(
+                            onPressed: () {}, icon: Icon(Icons.remove_circle, color: Colors.red,)
+                        )
+                      ],
+                    )
                   );
                 },
               ),
