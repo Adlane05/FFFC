@@ -244,6 +244,17 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           ListTile(
+            leading: Icon(Icons.notifications),
+              trailing: Text("${friendRequests.length}"),
+              title: Text("Friend Requests"),
+              onTap: () async {
+              // await Navigator.push(
+              //     context,
+              //     MaterialPageRoute(builder: (_) => FriendRequestScreen())
+              // );
+            },
+          ),
+          ListTile(
             leading: Icon(Icons.group),
             title: Text('Friends'),
             onTap: () async {
@@ -341,13 +352,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
-                    IconButton(
-                        onPressed: () {
-                          // TODO IMPLEMENT DROPDOWN OR SOME KIND OF MENU FOR FRIEND REQUESTS
-                        },
-                        icon: Icon(Icons.notifications)
-                    ),
-                    Text("${friendRequests.length}")
                   ]
                 )
               ),
