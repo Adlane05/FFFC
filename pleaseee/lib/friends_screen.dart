@@ -70,18 +70,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
           batch.update(
             FirebaseFirestore.instance.collection('users').doc(currentUid),
-            {'friends': FieldValue.arrayUnion([friendUid])},
-          );
-
-          batch.update(
-            FirebaseFirestore.instance.collection('users').doc(friendUid),
-            {'friends': FieldValue.arrayUnion([currentUid])},
+            {'FriendRequests': FieldValue.arrayUnion([friendUid])},
           );
 
           await batch.commit();
 
           setState(() {
-            _feedback = 'Friend added!';
+            _feedback = 'Friend Request Sent!';
             _emailCtrl.clear();
           });
 
