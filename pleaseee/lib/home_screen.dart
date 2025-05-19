@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _calendarDataFuture = _fetchCalendarData();
     monthController.view = CalendarView.workWeek;
     monthController.displayDate = currentDate;
+    initFriendRequests();
   }
 
   Future<_CalendarData> _fetchCalendarData() async {
@@ -208,17 +209,19 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       return [];
     } catch (e) {
-      return ["1", "2", "3"];
+      return [];
     }
   }
 
   void initFriendRequests() async {
-    friendRequests = await getFriendRequests();
+    final requests = await getFriendRequests();
+    setState(() {
+      friendRequests = requests;
+    });
   }
   
   @override
   Widget build(BuildContext context) {
-    initFriendRequests();
     return Scaffold(drawer: Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -245,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: Icon(Icons.notifications),
-              trailing: Text("${friendRequests.length}"),
+              trailing: (friendRequests.length > 0) ? Text("${friendRequests.length}") : Text(""),
               title: Text("Friend Requests"),
               onTap: () async {
               // await Navigator.push(
