@@ -68,7 +68,18 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
   }
 
   Future<void> acceptFriendRequest(String uidToAdd) async {
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {
+          "friends": FieldValue.arrayUnion([uidToAdd])
+        }
+    );
+    await FirebaseFirestore.instance.collection('users').doc(uidToAdd).update(
+        {
+          "friends": FieldValue.arrayUnion([user.uid])
+        }
+    );
 
+    denyFriendRequest(uidToAdd);
   }
 
   Future<void> denyFriendRequest(String uidToRemove) async {
