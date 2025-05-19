@@ -67,6 +67,22 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
     });
   }
 
+  Future<void> acceptFriendRequest(String uidToAdd) async {
+
+  }
+
+  Future<void> denyFriendRequest(String uidToRemove) async {
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {
+          'FriendRequests': FieldValue.arrayRemove([uidToRemove])
+        }
+    );
+
+    setState(() {
+      users.removeWhere((user) => user["uid"] == uidToRemove);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,10 +117,16 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                            onPressed: () {}, icon: Icon(Icons.add_circle, color: Colors.green,),
+                            onPressed: () {
+                              acceptFriendRequest(friend["uid"]);
+                            },
+                            icon: Icon(Icons.add_circle, color: Colors.green,),
                         ),
                         IconButton(
-                            onPressed: () {}, icon: Icon(Icons.remove_circle, color: Colors.red,)
+                            onPressed: () {
+                              denyFriendRequest(friend["uid"]);
+                            },
+                            icon: Icon(Icons.remove_circle, color: Colors.red,)
                         )
                       ],
                     )
