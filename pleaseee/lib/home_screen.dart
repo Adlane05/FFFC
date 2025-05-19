@@ -6,6 +6,7 @@ import 'package:pleaseee/friends_screen.dart';
 import 'package:pleaseee/main.dart';
 import 'package:pleaseee/profile_screen.dart';
 import 'package:pleaseee/survey_screen.dart';
+import 'package:pleaseee/friend_request_screen.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 
@@ -251,10 +252,10 @@ class _HomeScreenState extends State<HomeScreen> {
               trailing: (friendRequests.length > 0) ? Text("${friendRequests.length}") : Text(""),
               title: Text("Friend Requests"),
               onTap: () async {
-              // await Navigator.push(
-              //     context,
-              //     MaterialPageRoute(builder: (_) => FriendRequestScreen())
-              // );
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FriendRequestScreen())
+              );
             },
           ),
           ListTile(
