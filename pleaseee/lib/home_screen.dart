@@ -299,19 +299,31 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.legend.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, i) {
-                    final e = data.legend[i];
-                    return Row(children: [
-                      Container(width: 16, height: 16, color: e.color),
-                      const SizedBox(width: 4),
-                      Text(e.name),
-                    ]);
-                  },
-                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: data.legend.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, i) {
+                          final e = data.legend[i];
+                          return Row(children: [
+                            Container(width: 16, height: 16, color: e.color),
+                            const SizedBox(width: 4),
+                            Text(e.name),
+                          ]);
+                        },
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () {
+
+                        },
+                        icon: Icon(Icons.notifications)
+                    )
+                  ]
+                )
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
