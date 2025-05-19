@@ -12,48 +12,24 @@ class UpdateScheduleScreen extends StatefulWidget {
 
 class _UpdateScheduleScreenState extends State<UpdateScheduleScreen> {
   final PageController _pageController = PageController();
-  final Map<String, dynamic> _answers = {
-    'busySlots': <String, List<String>>{},
-    'customStatus': '',
-    'name': '',
-  };
 
-
-  int _currentIndex = 0;
-
-  void _nextPage() {
-    if (_currentIndex < 2) {
-      setState(() => _currentIndex++);
-      _pageController.nextPage(
-          duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-    } else {
-      _submitSurvey();
-    }
-  }
-
-  void _prevPage() {
-    if (_currentIndex > 0) {
-      setState(() => _currentIndex--);
-      _pageController.previousPage(
-          duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-    }
-  }
+  final GlobalKey<_BusySlotPickerState> busySlotPickerGlobalKey = GlobalKey<_BusySlotPickerState>();
 
   Future<void> _submitSurvey() async {
     final user = FirebaseAuth.instance.currentUser!;
+    final selectedSlots = busySlotPickerGlobalKey.currentState?._selectedSlots ?? {};
+
     try {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'busySlots': _answers['busySlots'],
-        'customStatus': _answers['customStatus'],
-        'name': _answers['name'],
+        'busySlots': selectedSlots,
       }, SetOptions(merge: true));
 
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
-      debugPrint('Error saving survey: $e');
+      debugPrint('Error saving changes: $e');
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Error saving survey')));
+          .showSnackBar(const SnackBar(content: Text('Error saving changes')));
     }
   }
 
@@ -76,7 +52,7 @@ class _UpdateScheduleScreenState extends State<UpdateScheduleScreen> {
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          BusySlotPicker(onSave: (slots) => _answers['busySlots'] = slots),
+          BusySlotPicker(key: busySlotPickerGlobalKey,),
         ],
       ),
       bottomNavigationBar: Padding(
@@ -84,11 +60,9 @@ class _UpdateScheduleScreenState extends State<UpdateScheduleScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (_currentIndex > 0)
-              ElevatedButton(onPressed: _prevPage, child: const Text('Back')),
             ElevatedButton(
-              onPressed: _nextPage,
-              child: Text(_currentIndex == 2 ? 'Finish' : 'Next'),
+              onPressed: _submitSurvey,
+              child: Text('Finish'),
             ),
           ],
         ),
@@ -98,15 +72,17 @@ class _UpdateScheduleScreenState extends State<UpdateScheduleScreen> {
 }
 
 class BusySlotPicker extends StatefulWidget {
-  final Function(Map<String, List<String>>) onSave;
 
-  const BusySlotPicker({required this.onSave, Key? key}) : super(key: key);
+  const BusySlotPicker({Key? key}) : super(key: key);
 
   @override
   State<BusySlotPicker> createState() => _BusySlotPickerState();
 }
 
 class _BusySlotPickerState extends State<BusySlotPicker> {
+  final user = FirebaseAuth.instance.currentUser!;
+  Map<String, List<String>> _selectedSlots = {};
+
   final List<String> weekdays = [
     'Monday',
     'Tuesday',
@@ -114,8 +90,43 @@ class _BusySlotPickerState extends State<BusySlotPicker> {
     'Thursday',
     'Friday'
   ];
+
   String _selectedDay = 'Monday';
-  final Map<String, List<String>> _selectedSlots = {};
+
+  @override
+  void initState() {
+    super.initState();
+    initBusySlots();
+  }
+
+  Future<Map<String, List<String>>> getBusySlots() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+
+        if (data != null) {
+          Map<String, dynamic> mapData = data["busySlots"];
+          Map<String, List<String>> busySlots = mapData.map((key, value) {
+            List<String> list = List<String>.from(value);
+            return MapEntry(key, list);
+          });
+          return busySlots;
+        }
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  void initBusySlots() async {
+    Map<String, List<String>> slots = await getBusySlots();
+    setState(() {
+      _selectedSlots = slots;
+    });
+  }
 
   List<String> _generateDaytimeSlots() {
     final slots = <String>[];
@@ -174,7 +185,6 @@ class _BusySlotPickerState extends State<BusySlotPicker> {
                       } else {
                         _selectedSlots[_selectedDay]!.add(slot);
                       }
-                      widget.onSave(_selectedSlots);
                     });
                   },
                   child: Container(
