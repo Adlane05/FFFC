@@ -8,6 +8,7 @@ import 'package:pleaseee/profile_screen.dart';
 import 'package:pleaseee/survey_screen.dart';
 import 'package:pleaseee/friend_request_screen.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:pleaseee/auth_service.dart';
 import 'package:intl/intl.dart';
 
 class _CalendarData {
@@ -276,6 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title: Text('Logout'),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
+              AuthService().signOut();
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => LandingPage()),
                     (Route<dynamic> route) => false,
