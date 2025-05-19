@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pleaseee/update_schedule_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -184,6 +185,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: _changeCalendarColor,
               icon: const Icon(Icons.color_lens),
               label: const Text('Change Calendar Color'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => UpdateScheduleScreen()),
+                );
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('Update Availabilities     ', textAlign: TextAlign.center,),
             ),
             const SizedBox(height: 24),
 
