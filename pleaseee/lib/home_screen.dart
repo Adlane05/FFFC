@@ -32,6 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   CalendarController monthController = CalendarController();
   DateTime currentDate = DateTime.now();
 
+  final startOfCalendar = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).
+  subtract(Duration(days: DateTime.now().weekday - 1)); // this week's Monday
+  final endOfCalendar = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).
+  subtract(Duration(days: DateTime.now().weekday - 1)).add(Duration(days: 365));
+
   @override
   void initState() {
     super.initState();
@@ -43,8 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<_CalendarData> _fetchCalendarData() async {
     try {
-      final today = DateTime.now();
-      final monday = today.subtract(Duration(days: today.weekday - 1));
       final usersCol = FirebaseFirestore.instance.collection('users');
 
       final meSnap = await usersCol.doc(user.uid).get();
@@ -108,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .map((u) => LegendEntry(name: u.name, color: u.color))
           .toList();
 
-      final appointments = _buildAppointments(allUsers, monday);
+      final appointments = _buildAppointments(allUsers, startOfCalendar, endOfCalendar);
 
       return _CalendarData(appointments, legend);
     } catch (e, st) {
@@ -117,31 +120,40 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  List<Appointment> _buildAppointments(List<_UserData> users, DateTime monday) {
+  List<Appointment> _buildAppointments(List<_UserData> users, DateTime startDate, DateTime endDate) {
     final List<Appointment> appts = [];
 
-    for (int dayOff = 0; dayOff < 5; dayOff++) {
-      final date = monday.add(Duration(days: dayOff));
-      final dayName = DateFormat.EEEE().format(date);
-      for (var u in users) {
-        final busy = u.busySlots[dayName] ?? <String>[];
-        for (int h = 8; h < 18; h++) {
-          for (var m in [0, 30]) {
-            final slot = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-            if (!busy.contains(slot)) {
-              final start = DateTime(date.year, date.month, date.day, h, m);
-              appts.add(Appointment(
-                startTime: start,
-                endTime: start.add(Duration(minutes: 30)),
-                color: u.color.withOpacity(0.6),
-                subject: '',
-                notes: u.uid,
-              ));
+    DateTime current = startDate;
+
+    while (current.isBefore(endDate)) {
+      if (current.weekday >= 1 && current.weekday <= 5) {
+        final dayName = DateFormat.EEEE().format(current);
+
+        for (var u in users) {
+          final busy = u.busySlots[dayName] ?? <String>[];
+
+          for (int h = 8; h < 18; h++) {
+            for (var m in [0, 30]) {
+              final slot = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+              if (!busy.contains(slot)) {
+                final start = DateTime(current.year, current.month, current.day, h, m);
+                appts.add(
+                    Appointment(
+                    startTime: start,
+                    endTime: start.add(Duration(minutes: 30)),
+                    color: u.color.withOpacity(0.6),
+                    subject: '',
+                    notes: u.uid,
+                  )
+                );
+              }
             }
           }
         }
       }
+      current = current.add(Duration(days: 1));
     }
+
     return appts;
   }
 
@@ -156,9 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: newColor,
         );
 
-        final today = DateTime.now();
-        final monday = today.subtract(Duration(days: today.weekday - 1));
-        final appointments = _buildAppointments(allUsers, monday);
+        final appointments = _buildAppointments(allUsers, startOfCalendar, endOfCalendar);
         final legend = allUsers
             .map((u) => LegendEntry(name: u.name, color: u.color))
             .toList();
@@ -221,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
       friendRequests = requests;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(drawer: Drawer(
@@ -239,20 +249,20 @@ class _HomeScreenState extends State<HomeScreen> {
             leading: Icon(Icons.person),
             title: Text('Profile'),
             onTap: () async {
-               await Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
-               setState(() {
-                 _calendarDataFuture = _fetchCalendarData();
-               });
+              setState(() {
+                _calendarDataFuture = _fetchCalendarData();
+              });
             },
           ),
           ListTile(
             leading: Icon(Icons.notifications),
-              trailing: (friendRequests.length > 0) ? Text("${friendRequests.length}") : Text(""),
-              title: Text("Friend Requests"),
-              onTap: () async {
+            trailing: (friendRequests.length > 0) ? Text("${friendRequests.length}") : Text(""),
+            title: Text("Friend Requests"),
+            onTap: () async {
               await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const FriendRequestScreen())
@@ -339,27 +349,27 @@ class _HomeScreenState extends State<HomeScreen> {
           return Column(
             children: [
               Container(
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: data.legend.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, i) {
-                          final e = data.legend[i];
-                          return Row(children: [
-                            Container(width: 16, height: 16, color: e.color),
-                            const SizedBox(width: 4),
-                            Text(e.name),
-                          ]);
-                        },
-                      ),
-                    ),
-                  ]
-                )
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                      children: [
+                        Expanded(
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: data.legend.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 12),
+                            itemBuilder: (context, i) {
+                              final e = data.legend[i];
+                              return Row(children: [
+                                Container(width: 16, height: 16, color: e.color),
+                                const SizedBox(width: 4),
+                                Text(e.name),
+                              ]);
+                            },
+                          ),
+                        ),
+                      ]
+                  )
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -387,11 +397,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   firstDayOfWeek: 1,
                   headerHeight: 0,
                   controller: monthController,
-                  // headerStyle: CalendarHeaderStyle(
-                  //     textStyle: TextStyle(color: Colors.black),
-                  //     textAlign: TextAlign.center
-                  // ),
-                  // showNavigationArrow: true,
                   timeSlotViewSettings: const TimeSlotViewSettings(
                     startHour: 8,
                     endHour: 18,
