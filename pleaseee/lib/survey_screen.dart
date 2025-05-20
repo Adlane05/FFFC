@@ -143,23 +143,18 @@ class _AddFriendPageState extends State<AddFriendPage> {
         if (friendUid == currentUid) {
           setState(() => _feedback = 'You can’t add yourself as a friend.');
         } else {
-          final userRef = FirebaseFirestore.instance.collection('users').doc(currentUid);
           final friendRef = FirebaseFirestore.instance.collection('users').doc(friendUid);
 
           final batch = FirebaseFirestore.instance.batch();
 
-          batch.update(userRef, {
-            'friends': FieldValue.arrayUnion([friendUid])
-          });
-
           batch.update(friendRef, {
-            'friends': FieldValue.arrayUnion([currentUid])
+            'FriendRequests': FieldValue.arrayUnion([currentUid])
           });
 
           await batch.commit();
 
           setState(() {
-            _feedback = 'Friend added!';
+            _feedback = 'Friend Request Sent!';
             _emailCtrl.clear();
           });
         }

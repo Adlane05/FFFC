@@ -69,8 +69,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
           final batch = FirebaseFirestore.instance.batch();
 
           batch.update(
-            FirebaseFirestore.instance.collection('users').doc(currentUid),
-            {'FriendRequests': FieldValue.arrayUnion([friendUid])},
+            FirebaseFirestore.instance.collection('users').doc(friendUid),
+            {'FriendRequests': FieldValue.arrayUnion([currentUid])},
           );
 
           await batch.commit();
